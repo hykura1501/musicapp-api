@@ -3,7 +3,11 @@ import {
   createSong,
   increaseView,
   increaseLike,
-  getAllSongs
+  getAllSongs,
+  getTopLikeSongs,
+  getPopularSongs,
+  getFavoriteSongs,
+  addFavoriteSong
 } from "@/controllers/song.controller";
 import authenticate from "@/middlewares/authenticate";
 import multer from "multer";
@@ -27,5 +31,11 @@ router.get("/", getAllSongs);
 
 router.post("/increase-view/:songId", increaseView);
 router.post("/increase-like/:songId", increaseLike);
+
+router.get("/top-likes", getTopLikeSongs);
+router.get("/popular", getPopularSongs);
+
+router.get("/favorite", authenticate, getFavoriteSongs);
+router.post("/favorite/add", authenticate, addFavoriteSong);
 
 export default router;

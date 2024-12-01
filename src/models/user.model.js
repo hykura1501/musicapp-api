@@ -6,6 +6,16 @@ const userSchema = new mongoose.Schema(
     email: String,
     password: String,
     avatar: String,
+    songUploaded: [
+      {
+        songId: String,
+      },
+    ],
+    favoriteSong: [
+      {
+        songId: String,
+      },
+    ],
     deleted: {
       type: Boolean,
       default: false,
