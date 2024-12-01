@@ -8,6 +8,16 @@ export const createSong = async (req, res) => {
     const { url, duration } = req.body;
     const song = new Song({ userId, url, duration });
     await song.save();
+    await User.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        $push: {
+          songUploaded: { songId: song._id },
+        },
+      }
+    );
     return res.status(201).json({ code: 201, data: song });
   } catch (error) {
     return res.status(500).json({ code: 500, message: error.message });
