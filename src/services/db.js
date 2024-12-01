@@ -3,7 +3,7 @@ import "dotenv/config";
 export const connect = async () => {
   try {
     await mongoose.connect(process.env.CONNECTION_STRING, {
-      dbName: 'music-app-db'
+      dbName: process.env.DB_NAME
     });
     console.log("Database connected successfully");
   } catch (error) {
