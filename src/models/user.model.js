@@ -8,7 +8,9 @@ const userSchema = new mongoose.Schema(
     avatar: String,
     songUploaded: [
       {
-        songId: String,
+        title: String,
+        url: String,
+        duration: Number
       },
     ],
     favoriteSong: [

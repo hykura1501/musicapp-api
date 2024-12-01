@@ -5,20 +5,21 @@ import User from "@/models/user.model";
 export const createSong = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { url, duration } = req.body;
-    const song = new Song({ userId, url, duration });
-    await song.save();
-    await User.updateOne(
+    const { url, title, duration } = req.body;
+    const user = await User.findOneAndUpdate(
       {
         _id: userId,
       },
       {
         $push: {
-          songUploaded: { songId: song._id },
+          songUploaded: { url, title, duration: parseInt(duration) },
         },
+      },
+      {
+        new: true,
       }
     );
-    return res.status(201).json({ code: 201, data: song });
+    return res.status(201).json({ code: 201, data: user.songUploaded });
   } catch (error) {
     return res.status(500).json({ code: 500, message: error.message });
   }
@@ -179,14 +180,20 @@ export const getFavoriteSongs = async (req, res) => {
 export const addFavoriteSong = async (req, res) => {
   try {
     const user = req.user;
-    const { songId } = req.body;
-    const isExisted = user.favoriteSong.some((item) => item.songId === songId);
+    const { songId } = req.params;
+    const isExisted = user.favoriteSong?.some((item) => item.songId === songId);
     if (isExisted) {
       return res.status(400).json({
         code: 400,
         message: "Song is already in favorite list",
       });
     }
+
+    const song = await Song.findOne({ _id: songId });
+    if (!song) { 
+      return res.status(404).json({ code: 404, message: "Song not found" });
+    }
+
     await User.updateOne(
       {
         _id: user.id,
@@ -197,12 +204,50 @@ export const addFavoriteSong = async (req, res) => {
         },
       }
     );
-    const song = await Song.findOne({ _id: songId });
+    
     return res.status(200).json({
       code: 200,
       data: song,
       message: "Add favorite song successfully",
     });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: error.message });
+  }
+};
+
+// [POST] /song/favorite/remove
+export const removeFavoriteSong = async (req, res) => {
+  try {
+    const user = req.user;
+    const { songId } = req.params;
+    const isExisted = user.favoriteSong?.some((item) => item.songId === songId);
+    if (!isExisted) {
+      return res.status(400).json({
+        code: 400,
+        message: "Song is not in favorite list",
+      });
+    }
+    
+    const song = await Song.findOne({ _id: songId });
+    if (!song) { 
+      return res.status(404).json({ code: 404, message: "Song not found" });
+    }
+    await User.updateOne(
+      {
+        _id: user.id,
+      },
+      {
+        $pull: {
+          favoriteSong: { songId },
+        },
+      }
+    );
+    
+    return res.status(200).json({
+      code: 200,
+      message: "Remove favorite song successfully",
+    });
+
   } catch (error) {
     return res.status(500).json({ code: 500, message: error.message });
   }

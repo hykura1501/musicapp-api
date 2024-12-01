@@ -1,6 +1,6 @@
-import { v2 as cloudinary } from 'cloudinary';
-import streamifier from 'streamifier';
-import 'dotenv/config';
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
+import "dotenv/config";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -8,16 +8,16 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET_KEY,
 });
 
-const streamUpload = (buffer, type) => {
+const streamUpload = (buffer, folder) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: 'auto', 
-        folder: type,
+        resource_type: "auto",
+        folder: folder,
       },
       (error, result) => {
         if (result) {
-          resolve(result); 
+          resolve(result);
         } else {
           reject(error);
         }
@@ -28,12 +28,12 @@ const streamUpload = (buffer, type) => {
   });
 };
 
-export default async (buffer, type) => {
+export default async (buffer, folder) => {
   try {
-    const result = await streamUpload(buffer, type);
-    return result; 
+    const result = await streamUpload(buffer, folder);
+    return result;
   } catch (error) {
-    console.error('Cloudinary Upload Error:', error);
+    console.error("Cloudinary Upload Error:", error);
     throw error;
   }
 };

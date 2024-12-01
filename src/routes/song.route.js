@@ -7,7 +7,8 @@ import {
   getTopLikeSongs,
   getPopularSongs,
   getFavoriteSongs,
-  addFavoriteSong
+  addFavoriteSong,
+  removeFavoriteSong
 } from "@/controllers/song.controller";
 import authenticate from "@/middlewares/authenticate";
 import multer from "multer";
@@ -36,6 +37,7 @@ router.get("/top-likes", getTopLikeSongs);
 router.get("/popular", getPopularSongs);
 
 router.get("/favorite", authenticate, getFavoriteSongs);
-router.post("/favorite/add", authenticate, addFavoriteSong);
+router.post("/favorite/add/:songId", authenticate, addFavoriteSong);
+router.delete("/favorite/remove/:songId", authenticate, removeFavoriteSong);
 
 export default router;

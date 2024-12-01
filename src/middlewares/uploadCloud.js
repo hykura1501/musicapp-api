@@ -1,12 +1,13 @@
 import upload from "@/services/cloudDinary";
 
-export const uploadCloud = (type) => {
+export const uploadCloud = (folder) => {
   return async (req, res, next) => {
     try {
       if (req.file) {
-        const result = await upload(req.file.buffer, type);
+        const result = await upload(req.file.buffer, folder);
         req.body[req.file.fieldname] = result.url;
-        req.body.duration = result.duration;
+        req.body.duration = result?.duration;
+        req.body.title = req.file.originalname;
       }
       next();
     } catch (error) {
