@@ -15,7 +15,10 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     lyric: String,
-    userId: String,
+    userId: {
+      type: String,
+      default: "",
+    },
     deleted: {
       type: Boolean,
       default: false,

@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { createSong } from "@/controllers/song.controller";
+import {
+  createSong,
+  increaseView,
+  increaseLike,
+  getAllSongs
+} from "@/controllers/song.controller";
 import authenticate from "@/middlewares/authenticate";
 import multer from "multer";
 import { uploadCloud } from "@/middlewares/uploadCloud";
@@ -17,5 +22,10 @@ router.post(
   validate(createSongRules),
   createSong
 );
+
+router.get("/", getAllSongs);
+
+router.post("/increase-view/:songId", increaseView);
+router.post("/increase-like/:songId", increaseLike);
 
 export default router;
