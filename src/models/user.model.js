@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
       {
         title: String,
         url: String,
-        duration: Number
+        duration: Number,
       },
     ],
     favoriteSong: [
