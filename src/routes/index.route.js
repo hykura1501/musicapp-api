@@ -13,5 +13,5 @@ export default (app) => {
   app.use("/user", userRoutes);
   app.use("/other", authenticate, otherSongServicesRoutes);
   app.use("/artist", authenticate, artistRoutes);
-  app.use("/comment", authenticate, commentRoutes);
+  app.use("/comment", commentRoutes);
 };
