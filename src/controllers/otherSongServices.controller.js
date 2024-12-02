@@ -1,5 +1,6 @@
 import RecentlyPlayed from "@/models/recently-played.model";
 import Song from "@/models/song.model";
+import DownloadedSong from "@/models/downloaded-songs.model";
 import { sortByKey } from "@/helpers/sortByKey";
 // [POST] /other/recently-played
 export const updateRecentlyPlayed = async (req, res) => {
@@ -50,5 +51,54 @@ export const getRecentlyPlayed = async (req, res) => {
   } catch (error) {
     console.error("Error getting recently played:", error);
     res.status(500).json({ code: 500, error: error.message });
+  }
+};
+
+// [POST] /other/downloaded-songs
+export const addDownloadedSongs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { songId, localURL } = req.body;
+
+    const song = await Song.findById(songId);
+    if (!song) {
+      return res.status(404).json({ code: 404, message: "Song not found" });
+    }
+    const exists = await DownloadedSong.findOne({
+      userId,
+      songId,
+      deleted: false,
+    });
+    if (exists) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Song already downloaded" });
+    }
+    await DownloadedSong.create({ userId, songId, localURL });
+    return res.status(201).json({ code: 201, message: "Song downloaded" });
+  } catch (error) {
+    res.status(500).json({ code: 500, error: error.message });
+  }
+};
+
+// [GET] /other/downloaded-songs
+export const getDownloadedSongs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const downloadedSongs = await DownloadedSong.find({
+      userId,
+      deleted: false,
+    });
+    if (!downloadedSongs) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "No downloaded songs found" });
+    }
+    const songIds = downloadedSongs.map((item) => item.songId.toString());
+    const songs = await Song.find({ _id: { $in: songIds } });
+    const sortedSongs = sortByKey(songs, songIds, "_id");
+    return res.status(200).json({ code: 200, data: sortedSongs });
+  } catch (error) {
+    return res.status(500).json({ code: 500, error: error.message });
   }
 };

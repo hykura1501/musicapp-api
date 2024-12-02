@@ -13,12 +13,6 @@ const userSchema = new mongoose.Schema(
         duration: Number,
       },
     ],
-    downloadedSongs: [
-      {
-        songId: String,
-        localURL: String,
-      },
-    ],
     favoriteSongs: [
       {
         songId: String,
