@@ -23,6 +23,29 @@ export const createPlaylist = async (req, res) => {
   }
 };
 
+// [DELETE] /playlist/:playlistId
+export const deletePlaylist = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { playlistId } = req.params;
+    const playlist = await Playlist.findOne({
+      _id: playlistId,
+      userId,
+      deleted: false,
+    });
+    if (!playlist) {
+      return res.status(404).json({ message: "Playlist not found" });
+    }
+    playlist.deleted = true;
+    await playlist.save();
+    return res
+      .status(200)
+      .json({ code: 200, message: "Delete playlist successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // [GET] /playlist/:playlistId
 export const getSongsOfPlaylist = async (req, res) => {
   try {
