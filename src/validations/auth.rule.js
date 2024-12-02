@@ -6,6 +6,6 @@ export const registerRules = [
 ]
 
 export const loginRules = [
-	body('email').exists().isLength({ min: 6 }),
+	body('email').isEmail(),
 	body('password').isLength({ min: 6 }),
 ]
