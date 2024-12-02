@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema(
         songId: String,
       },
     ],
+    favoriteArtists: [
+      {
+        artistId: String,
+      }
+    ],
     deleted: {
       type: Boolean,
       default: false,
