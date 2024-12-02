@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema(
+const songSchema = new mongoose.Schema(
   {
     title: String,
     artistID: String,
@@ -27,5 +27,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Song = mongoose.model("Song", userSchema, "songs");
+const Song = mongoose.model("Song", songSchema, "songs");
 export default Song;

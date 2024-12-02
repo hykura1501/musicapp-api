@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema(
+const playlistSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
@@ -20,5 +20,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Playlist = mongoose.model("Playlist", userSchema, "playlists");
+const Playlist = mongoose.model("Playlist", playlistSchema, "playlists");
 export default Playlist;

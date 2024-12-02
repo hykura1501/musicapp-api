@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema(
+const artistSchema = new mongoose.Schema(
   {
     name: String,
     description: String,
@@ -13,5 +13,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-const Artist = mongoose.model("Artist", userSchema, "artists");
+const Artist = mongoose.model("Artist", artistSchema, "artists");
 export default Artist;

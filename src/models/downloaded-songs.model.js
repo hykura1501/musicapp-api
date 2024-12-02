@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema(
+const downloadedSongSchema = new mongoose.Schema(
   {
     userId: String,
     songId: String,
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
 );
 const DownloadedSong = mongoose.model(
   "DownloadedSong",
-  userSchema,
+  downloadedSongSchema,
   "downloaded-songs"
 );
 export default DownloadedSong;
