@@ -6,14 +6,20 @@ const userSchema = new mongoose.Schema(
     email: String,
     password: String,
     avatar: String,
-    songUploaded: [
+    uploadedSongs: [
       {
         title: String,
         url: String,
         duration: Number,
       },
     ],
-    favoriteSong: [
+    downloadedSongs: [
+      {
+        songId: String,
+        localURL: String,
+      },
+    ],
+    favoriteSongs: [
       {
         songId: String,
       },
