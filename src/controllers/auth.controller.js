@@ -16,7 +16,7 @@ export const login = async (req, res) => {
         .status(400)
         .json({ code: 400, message: "Password is incorrect" });
     }
-    delete user.password;
+    user.password = undefined;
     const token = generateToken({ id: user._id });
     return res.status(200).json({
       code: 200,
@@ -40,7 +40,7 @@ export const register = async (req, res) => {
     const hashedPassword = await hash(password, 10);
     const user = new User({ fullName, email, password: hashedPassword });
     await user.save();
-    delete user.password;
+    user.password = undefined;
     const token = generateToken({ id: user._id });
     return res.status(201).json({
       code: 201,
