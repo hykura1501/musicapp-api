@@ -3,15 +3,13 @@ import {
   updateRecentlyPlayed,
   getRecentlyPlayed,
   addDownloadedSongs,
-  getDownloadedSongs
+  getDownloadedSongs,
 } from "@/controllers/otherSongServices.controller";
-import authenticate from "@/middlewares/authenticate";
 const router = Router();
 
-router.post("/recently-played/:songId", authenticate, updateRecentlyPlayed);
-router.get("/recently-played", authenticate, getRecentlyPlayed);
+router.post("/recently-played/:songId", updateRecentlyPlayed);
+router.get("/recently-played", getRecentlyPlayed);
 
-router.post("/downloaded-songs", authenticate, addDownloadedSongs);
-router.get("/downloaded-songs", authenticate, getDownloadedSongs);
-
+router.post("/downloaded-songs", addDownloadedSongs);
+router.get("/downloaded-songs", getDownloadedSongs);
 export default router;
