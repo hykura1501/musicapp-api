@@ -14,6 +14,7 @@ const songSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    album: String,
     lyric: String,
     userId: {
       type: String,
