@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 const artistSchema = new mongoose.Schema(
   {
+    artistId: String,
     name: String,
     description: String,
-    follower: String,
+    followers: String,
     avatar: String,
+    birthday: String,
     deleted: {
       type: Boolean,
       default: false,

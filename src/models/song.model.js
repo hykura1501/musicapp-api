@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const songSchema = new mongoose.Schema(
   {
     title: String,
-    artistID: String,
+    artistId: String,
     thumbnail: String,
     url: String,
     duration: Number,
