@@ -27,7 +27,11 @@ export const createPlaylist = async (req, res) => {
     const userId = req.user.id;
     const { title } = req.body;
     const playlist = await Playlist.create({ userId, title });
-    return res.status(200).json({ code: 200, data: playlist });
+    return res.status(200).json({ code: 200, data: {
+      playlistId: playlist._id,
+      title: playlist.title,
+      songs: [],
+    } });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
   }
