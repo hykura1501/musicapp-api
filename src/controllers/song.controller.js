@@ -216,7 +216,7 @@ export const addFavoriteSong = async (req, res) => {
       },
       {
         $push: {
-          favoriteSong: { songId },
+          favoriteSongs: { songId },
         },
       }
     );
@@ -256,7 +256,7 @@ export const removeFavoriteSong = async (req, res) => {
       },
       {
         $pull: {
-          favoriteSong: { songId },
+          favoriteSongs: { songId },
         },
       }
     );
