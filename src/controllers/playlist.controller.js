@@ -10,7 +10,6 @@ export const getAllPlaylists = async (req, res) => {
       const playlistSongs = playlist?.songIds?.map((song) => song.songId);
       const songs = await Song.find({ _id: { $in: playlistSongs } }).select("-userId");
       result.push({
-        userId,
         playlistId: playlist._id,
         title: playlist.title,
         songs,
