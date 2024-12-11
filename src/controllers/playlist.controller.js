@@ -5,7 +5,18 @@ export const getAllPlaylists = async (req, res) => {
   try {
     const userId = req.user.id;
     const playlists = await Playlist.find({ userId, deleted: false });
-    return res.status(200).json({ code: 200, data: playlists });
+    const result = [];
+    for (const playlist of playlists) { 
+      const playlistSongs = playlist?.songIds?.map((song) => song.songId);
+      const songs = await Song.find({ _id: { $in: playlistSongs } }).select("-userId");
+      result.push({
+        userId,
+        playlistId: playlist._id,
+        title: playlist.title,
+        songs,
+      })
+    }
+    return res.status(200).json({ code: 200, data: result });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
   }
@@ -59,7 +70,7 @@ export const getSongsOfPlaylist = async (req, res) => {
     if (!playlist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
-    const playlistSongs = playlist?.songs?.map((song) => song.songId);
+    const playlistSongs = playlist?.songIds?.map((song) => song.songId);
     const songs = await Song.find({ _id: { $in: playlistSongs } });
     return res.status(200).json({
       code: 200,
@@ -88,7 +99,7 @@ export const addSongToPlaylist = async (req, res) => {
     if (!playlist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
-    const isExisted = playlist?.songs?.some((item) => item.songId === songId);
+    const isExisted = playlist?.songIds?.some((item) => item.songId === songId);
     if (isExisted) {
       return res.status(400).json({ message: "Song is already in playlist" });
     }
@@ -96,7 +107,7 @@ export const addSongToPlaylist = async (req, res) => {
     if (!song) {
       return res.status(404).json({ message: "Song not found" });
     }
-    playlist.songs.push({ songId });
+    playlist.songIds.push({ songId });
     await playlist.save();
     return res.status(200).json(playlist);
   } catch (error) {
