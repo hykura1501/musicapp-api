@@ -11,7 +11,7 @@ export const getMe = async (req, res) => {
     );
     const favoriteSongs = [];
     for (let id of favoriteSongIds) {
-      const song = await Song.findById(id);
+      const song = await Song.findById(id).select("-userId");
       if (song) {
         favoriteSongs.push(song);
       }
