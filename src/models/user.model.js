@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     uploadedSongs: [
       {
         title: String,
-        url: String,
+        path: String,
         duration: Number,
       },
     ],

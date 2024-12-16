@@ -5,7 +5,7 @@ const songSchema = new mongoose.Schema(
     artistId: String,
     artistName: String,
     thumbnail: String,
-    url: String,
+    path: String,
     duration: Number,
     view: {
       type: Number,

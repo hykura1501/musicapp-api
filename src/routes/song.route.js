@@ -9,7 +9,8 @@ import {
   getFavoriteSongs,
   addFavoriteSong,
   removeFavoriteSong,
-  getNewReleaseSongs
+  getNewReleaseSongs,
+  getSongDetail
 } from "@/controllers/song.controller";
 import authenticate from "@/middlewares/authenticate";
 import multer from "multer";
@@ -30,7 +31,7 @@ router.post(
 );
 
 router.get("/", getAllSongs);
-
+router.get("/:songId", getSongDetail);
 router.post("/increase-view/:songId", increaseView);
 router.post("/increase-like/:songId", increaseLike);
 

@@ -12,7 +12,7 @@ export const createSong = async (req, res) => {
       },
       {
         $push: {
-          uploadedSongs: { url, title, duration: parseInt(duration) },
+          uploadedSongs: { path: url, title, duration: parseInt(duration) },
         },
       },
       {
@@ -22,6 +22,20 @@ export const createSong = async (req, res) => {
     return res.status(201).json({ code: 201, data: user.uploadedSongs });
   } catch (error) {
     return res.status(500).json({ code: 500, message: error.message });
+  }
+};
+
+// [GET] /song/:songId
+export const getSongDetail = async (req, res) => {
+  try {
+    const songId = req.params.songId;
+    const song = await Song.findOne({ _id: songId }).select("-userId");
+    if (!song) {
+      return res.status(404).json({ code: 404, message: "Song not found" });
+    }
+    return res.status(200).json({ code: 200, data: song });
+  } catch (error) {
+    res.status(500).json({ code: 500, message: error.message });
   }
 };
 
@@ -72,7 +86,8 @@ export const getAllSongs = async (req, res) => {
     });
     const songs = await Song.find({
       title: new RegExp(keyword, "i"),
-    }).select("-userId")
+    })
+      .select("-userId")
       .limit(query.perPage)
       .skip((query.page - 1) * query.perPage);
     return res.status(200).json({
@@ -95,7 +110,8 @@ export const getTopLikeSongs = async (req, res) => {
       perPage: parseInt(req.query.perPage) || 10,
     };
     const count = await Song.countDocuments({});
-    const songs = await Song.find({}).select("-userId")
+    const songs = await Song.find({})
+      .select("-userId")
       .sort({ like: -1 })
       .limit(query.perPage)
       .skip((query.page - 1) * query.perPage);
@@ -119,7 +135,8 @@ export const getPopularSongs = async (req, res) => {
       perPage: parseInt(req.query.perPage) || 10,
     };
     const count = await Song.countDocuments({});
-    const songs = await Song.find({}).select("-userId")
+    const songs = await Song.find({})
+      .select("-userId")
       .sort({ view: -1 })
       .limit(query.perPage)
       .skip((query.page - 1) * query.perPage);
@@ -143,7 +160,8 @@ export const getNewReleaseSongs = async (req, res) => {
       perPage: parseInt(req.query.perPage) || 10,
     };
     const count = await Song.countDocuments({});
-    const songs = await Song.find({}).select("-userId")
+    const songs = await Song.find({})
+      .select("-userId")
       .sort({ createdAt: -1 })
       .limit(query.perPage)
       .skip((query.page - 1) * query.perPage);
@@ -175,7 +193,8 @@ export const getFavoriteSongs = async (req, res) => {
 
     const favoriteSongs = await Song.find({
       _id: { $in: favoriteSongIds.map((item) => item.songId) },
-    }).select("-userId")
+    })
+      .select("-userId")
       .limit(query.perPage)
       .skip((query.page - 1) * query.perPage);
     return res.status(200).json({
