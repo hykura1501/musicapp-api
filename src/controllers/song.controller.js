@@ -123,6 +123,7 @@ export const getTopLikeSongs = async (req, res) => {
       totalPage: Math.ceil(count / query.perPage),
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ code: 500, message: error.message });
   }
 };
