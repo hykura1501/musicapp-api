@@ -31,7 +31,7 @@ router.post(
 );
 
 router.get("/", getAllSongs);
-// router.get("/:songId", getSongDetail);
+router.get("/detail/:songId", getSongDetail);
 router.post("/increase-view/:songId", increaseView);
 router.post("/increase-like/:songId", increaseLike);
 

@@ -25,7 +25,7 @@ export const createSong = async (req, res) => {
   }
 };
 
-// [GET] /song/:songId
+// [GET] /song/detail/:songId
 export const getSongDetail = async (req, res) => {
   try {
     const songId = req.params.songId;
