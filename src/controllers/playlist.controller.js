@@ -117,3 +117,31 @@ export const addSongToPlaylist = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// [DELETE] /playlist/remove-song/:playlistId
+export const removeSongFromPlaylist = async (req, res) => { 
+  try {
+    const userId = req.user.id;
+    const { playlistId } = req.params;
+    const { songId } = req.body;
+    const playlist = await Playlist.findOne({
+      _id: playlistId,
+      userId,
+      deleted: false,
+    });
+    if (!playlist) {
+      return res.status(404).json({ message: "Playlist not found" });
+    }
+    const songIndex = playlist.songIds.findIndex(
+      (item) => item.songId === songId
+    );
+    if (songIndex === -1) {
+      return res.status(404).json({ message: "Song not found in playlist" });
+    }
+    playlist.songIds.splice(songIndex, 1);
+    await playlist.save();
+    return res.status(200).json(playlist);
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}

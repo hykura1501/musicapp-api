@@ -4,7 +4,8 @@ import {
   createPlaylist,
   addSongToPlaylist,
   getSongsOfPlaylist,
-  deletePlaylist
+  deletePlaylist,
+  removeSongFromPlaylist
 } from "@/controllers/playlist.controller";
 import { loginRules, registerRules } from "@/validations/auth.rule";
 import validate from "@/middlewares/validate";
@@ -16,5 +17,6 @@ router.get("/:playlistId", getSongsOfPlaylist);
 router.delete("/:playlistId", deletePlaylist);
 router.post("/", createPlaylist);
 router.post("/add-song/:playlistId", addSongToPlaylist);
+router.delete("/remove-song/:playlistId", removeSongFromPlaylist);
 
 export default router;
