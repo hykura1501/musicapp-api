@@ -50,6 +50,7 @@ export const register = async (req, res) => {
 export const loginGoogleCallback = (req, res) => {
   try {
     const user = req.user;
+    console.log(user);
     const jwtToken = jwt.sign(
       {
         id: user.id,
