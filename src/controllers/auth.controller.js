@@ -73,6 +73,8 @@ export const loginGoogleCallback = async (req, res) => {
       token: jwtToken,
     });
   } catch (error) {
+    console.log("Lỗi lồn què gì vậy:", error);
+    
     res.status(500).json({ message: "Internal server error" });
   }
 };
