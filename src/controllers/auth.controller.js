@@ -3,6 +3,7 @@ import { hash } from "bcrypt";
 import { generateToken } from "@/helpers/token";
 import { compare } from "bcrypt";
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
