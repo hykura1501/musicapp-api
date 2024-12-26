@@ -47,31 +47,30 @@ export const register = async (req, res) => {
   } catch (error) {}
 };
 
-export const loginGoogleCallback = (req, res) => {
+export const loginGoogleCallback = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user);
-    const jwtToken = jwt.sign(
-      {
-        id: user.id,
-        email: user.emails[0].value,
-        name: user.displayName,
-        picture: user.photos[0].value,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+
+    const existedUser = await User.findOne({
+      email: user.email,
+    });
+
+    if (!existedUser) {
+      const newUser = new User(user);
+      await newUser.save();
+      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      return res.status(201).json({
+        code: 201,
+        token,
+      });
+    }
+
+    const jwtToken = jwt.sign({ id: existedUser._id }, process.env.JWT_SECRET);
 
     // Trả JWT token cho ứng dụng Android
-    res.json({
-      success: true,
+    res.status(201).json({
+      code: 200,
       token: jwtToken,
-      user: {
-        id: user.id,
-        email: user.emails[0].value,
-        name: user.displayName,
-        picture: user.photos[0].value,
-      },
     });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
