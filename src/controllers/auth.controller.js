@@ -2,6 +2,7 @@ import User from "@/models/user.model";
 import { hash } from "bcrypt";
 import { generateToken } from "@/helpers/token";
 import { compare } from "bcrypt";
+import jwt from "jsonwebtoken";
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -10,7 +11,7 @@ export const login = async (req, res) => {
       return res.status(404).json({ code: 404, message: "User not found" });
     }
     const isPasswordMatched = await compare(password, user.password);
-    
+
     if (!isPasswordMatched) {
       return res
         .status(400)
@@ -27,7 +28,7 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
-    
+
     const isExisted = await User.findOne({ email });
     if (isExisted) {
       return res
@@ -44,4 +45,34 @@ export const register = async (req, res) => {
       token,
     });
   } catch (error) {}
+};
+
+export const loginGoogleCallback = (req, res) => {
+  try {
+    const user = req.user;
+    const jwtToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.emails[0].value,
+        name: user.displayName,
+        picture: user.photos[0].value,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Trả JWT token cho ứng dụng Android
+    res.json({
+      success: true,
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.emails[0].value,
+        name: user.displayName,
+        picture: user.photos[0].value,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
