@@ -2,8 +2,6 @@ import User from "@/models/user.model";
 import { hash } from "bcrypt";
 import { generateToken } from "@/helpers/token";
 import { compare } from "bcrypt";
-import jwt from "jsonwebtoken";
-import "dotenv/config";
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -61,19 +59,19 @@ export const loginGoogleCallback = async (req, res) => {
     if (!existedUser) {
       const newUser = new User(user);
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+      const token = generateToken({ id: newUser._id });
       return res.status(201).json({
         code: 201,
         token,
       });
     }
 
-    const jwtToken = jwt.sign({ id: existedUser._id }, process.env.JWT_SECRET);
+    const token = generateToken({ id: user._id });
 
     // Trả JWT token cho ứng dụng Android
     res.status(201).json({
       code: 200,
-      token: jwtToken,
+      token: token,
     });
   } catch (error) {
     console.log("Lỗi lồn què gì vậy:", error);
