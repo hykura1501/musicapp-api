@@ -17,8 +17,7 @@ export default (app) => {
           email: profile.emails[0].value,
           avatar: profile.photos[0].value,
         };
-        console.log(user);
-        done(null, profile);
+        done(null, user);
       }
     )
   );
