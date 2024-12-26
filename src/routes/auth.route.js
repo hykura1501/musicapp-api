@@ -18,7 +18,7 @@ router.get(
 );
 
 router.get(
-  '/auth/google/callback',
+  '/google/callback',
   passport.authenticate('google', { session: false }),
   loginGoogleCallback
 );
