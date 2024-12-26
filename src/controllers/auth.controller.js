@@ -51,6 +51,8 @@ export const loginGoogleCallback = async (req, res) => {
   try {
     const user = req.user;
 
+    console.log("User:", user);
+
     const existedUser = await User.findOne({
       email: user.email,
     });
