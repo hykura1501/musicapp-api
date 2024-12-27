@@ -66,30 +66,21 @@ export const loginGoogle = async (req, res, next) => {
 
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
-    const existedUser = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
+    let token;
 
-    console.log("existedUser:", existedUser);
-
-    console.log("payload:", payload);
-
-    console.log("name:", name);
-    
-
-    let token
-
-    if (!existedUser) { 
-      const newUser = new User({
+    if (!user) {
+      user = new User({
         email,
         fullName: name,
         avatar: picture,
       });
 
-      await newUser.save();
-      token = generateToken({ id: newUser._id });
-    } else {
-      token = generateToken({ id: existedUser._id });
+      await user.save();
     }
+    
+    token = generateToken({ id: user._id });
 
     res.status(200).json({
       code: 200,
@@ -101,38 +92,49 @@ export const loginGoogle = async (req, res, next) => {
   }
 };
 
-export const loginGoogleCallback = async (req, res) => {
+export const loginFacebook = async (req, res) => {
+  const { accessToken } = req.body;
+
+  console.log("accessToken", accessToken);
+  
+  if (!accessToken) {
+    return res.status(400).json({ error: "Access token is required" });
+  }
+
   try {
-    const user = req.user;
+    // Xác thực access token với Facebook
+    const fbResponse = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`
+    );
+
+    const { id, name, email, picture } = fbResponse.data;
+
+    console.log("Data from Facebook", fbResponse.data);
+    
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    let user = await User.findOne({ email });
+    let token;
 
     if (!user) {
-      throw new Error("User not found in request");
+      user = new User({
+        fullName: name,
+        email,
+        avatar: picture.data.url,
+      });
+      await user.save();
     }
 
-    console.log("User:", user);
+    token = generateToken({ id: user._id });
 
-    // Kiểm tra user đã tồn tại
-    let token;
-    const existedUser = await User.findOne({ email: user.email });
-    if (!existedUser) {
-      const newUser = new User(user);
-      await newUser.save();
-      token = generateToken({ id: newUser._id });
-    } else {
-      token = generateToken({ id: existedUser._id });
-    }
+    console.log("Token", token);
 
-    // Redirect về ứng dụng Android với token
-    const androidAppRedirectUri = `music-app://callback?token=${token}`;
-    console.log("Redirecting to:", androidAppRedirectUri);
-    return res.redirect(androidAppRedirectUri);
+    res.status(200).json({ token });
   } catch (error) {
-    console.error("Error in loginGoogleCallback:", error);
-
-    // Redirect về ứng dụng Android với lỗi
-    const errorRedirectUri = `music-app://callback?error=${encodeURIComponent(
-      error.message || "Internal server error"
-    )}`;
-    return res.redirect(errorRedirectUri);
+    console.error(error);
+    res.status(500).json({ error: "Failed to authenticate with Facebook" });
   }
 };
