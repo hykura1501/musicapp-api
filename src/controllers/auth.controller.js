@@ -107,7 +107,7 @@ export const loginFacebook = async (req, res) => {
       `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`
     );
 
-    const { id, name, email, picture } = fbResponse.data;
+    // const { name, email, picture } = fbResponse.data;
 
     console.log("Data from Facebook", fbResponse.data);
     
