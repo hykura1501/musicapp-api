@@ -104,7 +104,7 @@ export const loginFacebook = async (req, res) => {
   try {
     // Xác thực access token với Facebook
     const fbResponse = await fetch(
-      `https://graph.facebook.com/v21.0/me?fields=id%2Cname%2Cemail%2Cpicture&access_token=${accessToken}`
+      `https://graph.facebook.com/v21.0/me?fields=id%2Cname%2Cemail%2Cpicture.height(500).width(500)&access_token=${accessToken}`
     );
     
     if (!fbResponse.ok) {
@@ -114,8 +114,10 @@ export const loginFacebook = async (req, res) => {
     // Parse JSON response
     const fbData = await fbResponse.json();
     console.log("Data from Facebook", fbData);
-    
-    
+
+    const email = fbData.email;
+    const name = fbData.name;
+    const picture = fbData.picture.data.url;
 
     if (!email) {
       return res.status(400).json({ error: "Email is required" });
@@ -128,7 +130,7 @@ export const loginFacebook = async (req, res) => {
       user = new User({
         fullName: name,
         email,
-        avatar: picture.data.url,
+        avatar: picture,
       });
       await user.save();
     }
