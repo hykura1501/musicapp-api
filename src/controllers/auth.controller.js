@@ -55,27 +55,23 @@ export const loginGoogleCallback = async (req, res) => {
     const existedUser = await User.findOne({
       email: user.email,
     });
-
+    
+    
     if (!existedUser) {
       const newUser = new User(user);
       await newUser.save();
       const token = generateToken({ id: newUser._id });
-      return res.status(201).json({
-        code: 201,
-        token,
-      });
+      const androidAppRedirectUri = `music-app://callback?token=${token}`;
+      return res.redirect(androidAppRedirectUri);
     }
 
     const token = generateToken({ id: user._id });
 
-    // Trả JWT token cho ứng dụng Android
-    res.status(201).json({
-      code: 200,
-      token: token,
-    });
+    const androidAppRedirectUri = `music-app://callback?token=${token}`;
+    return res.redirect(androidAppRedirectUri);
+
   } catch (error) {
     console.log("Lỗi lồn què gì vậy:", error);
-    
     res.status(500).json({ message: "Internal server error" });
   }
 };
