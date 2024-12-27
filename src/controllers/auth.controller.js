@@ -55,7 +55,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const loginGoogle = async (req, res, next) => { 
   const { idToken } = req.body;
-
+  console.log(idToken);
   if (!idToken) {
     return res.status(400).json({ error: 'Missing idToken' });
   }
