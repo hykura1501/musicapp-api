@@ -106,10 +106,15 @@ export const loginFacebook = async (req, res) => {
     const fbResponse = await fetch(
       `https://graph.facebook.com/v21.0/me?fields=id%2Cname%2Cemail%2Cpicture&access_token=${accessToken}`
     );
-
-    // const { name, email, picture } = fbResponse.data;
-
-    console.log("Data from Facebook", fbResponse.data);
+    
+    if (!fbResponse.ok) {
+      throw new Error(`Facebook API Error: ${fbResponse.statusText}`);
+    }
+    
+    // Parse JSON response
+    const fbData = await fbResponse.json();
+    console.log("Data from Facebook", fbData);
+    
     
 
     if (!email) {
