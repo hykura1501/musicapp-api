@@ -79,7 +79,7 @@ export const loginGoogle = async (req, res, next) => {
 
       await user.save();
     }
-
+    
     token = generateToken({ id: user._id });
 
     res.status(200).json({
@@ -96,7 +96,7 @@ export const loginFacebook = async (req, res) => {
   const { accessToken } = req.body;
 
   console.log("accessToken", accessToken);
-
+  
   if (!accessToken) {
     return res.status(400).json({ error: "Access token is required" });
   }
@@ -104,12 +104,13 @@ export const loginFacebook = async (req, res) => {
   try {
     // Xác thực access token với Facebook
     const fbResponse = await fetch(
-      `"https://graph.facebook.com/v21.0/me?fields=id%2Cname%2Cemail%2Cpicture&access_token=${accessToken}"`
+      `https://graph.facebook.com/v21.0/me?fields=id%2Cname%2Cemail%2Cpicture&access_token=${accessToken}`
     );
 
     // const { name, email, picture } = fbResponse.data;
 
     console.log("Data from Facebook", fbResponse.data);
+    
 
     if (!email) {
       return res.status(400).json({ error: "Email is required" });
