@@ -45,33 +45,38 @@ export const register = async (req, res) => {
     });
   } catch (error) {}
 };
-
 export const loginGoogleCallback = async (req, res) => {
   try {
     const user = req.user;
 
+    if (!user) {
+      throw new Error("User not found in request");
+    }
+
     console.log("User:", user);
 
-    const existedUser = await User.findOne({
-      email: user.email,
-    });
-    
-    
+    // Kiểm tra user đã tồn tại
+    let token;
+    const existedUser = await User.findOne({ email: user.email });
     if (!existedUser) {
       const newUser = new User(user);
       await newUser.save();
-      const token = generateToken({ id: newUser._id });
-      const androidAppRedirectUri = `music-app://callback?token=${token}`;
-      return res.redirect(androidAppRedirectUri);
+      token = generateToken({ id: newUser._id });
+    } else {
+      token = generateToken({ id: existedUser._id });
     }
 
-    const token = generateToken({ id: user._id });
-
+    // Redirect về ứng dụng Android với token
     const androidAppRedirectUri = `music-app://callback?token=${token}`;
+    console.log("Redirecting to:", androidAppRedirectUri);
     return res.redirect(androidAppRedirectUri);
-
   } catch (error) {
-    console.log("Lỗi lồn què gì vậy:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in loginGoogleCallback:", error);
+
+    // Redirect về ứng dụng Android với lỗi
+    const errorRedirectUri = `music-app://callback?error=${encodeURIComponent(
+      error.message || "Internal server error"
+    )}`;
+    return res.redirect(errorRedirectUri);
   }
 };
