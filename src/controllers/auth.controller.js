@@ -2,7 +2,7 @@ import User from "@/models/user.model";
 import { hash } from "bcrypt";
 import { generateToken } from "@/helpers/token";
 import { compare } from "bcrypt";
-const { OAuth2Client } = require('google-auth-library');
+import { OAuth2Client } from "google-auth-library";
 
 import "dotenv/config";
 
@@ -50,14 +50,12 @@ export const register = async (req, res) => {
   } catch (error) {}
 };
 
-
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-export const loginGoogle = async (req, res, next) => { 
+export const loginGoogle = async (req, res, next) => {
   const { idToken } = req.body;
-  console.log(idToken);
   if (!idToken) {
-    return res.status(400).json({ error: 'Missing idToken' });
+    return res.status(400).json({ error: "Missing idToken" });
   }
 
   try {
@@ -67,10 +65,23 @@ export const loginGoogle = async (req, res, next) => {
     });
 
     const payload = ticket.getPayload();
-    const { sub, email, name, picture } = payload;
-    console.log('payload:', payload);
-    
-    const token = generateToken({ id: sub });
+    const { email, name, picture } = payload;
+    const existedUser = await User.findOne({ email });
+
+    let token
+
+    if (!existedUser) { 
+      const newUser = new User({
+        email,
+        fullName: name,
+        avatar: picture,
+      });
+
+      await newUser.save();
+      token = generateToken({ id: newUser._id });
+    } else {
+      token = generateToken({ id: existedUser._id });
+    }
 
     res.status(200).json({
       code: 200,
@@ -78,10 +89,9 @@ export const loginGoogle = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to authenticate' });
+    res.status(500).json({ error: "Failed to authenticate" });
   }
-}
-
+};
 
 export const loginGoogleCallback = async (req, res) => {
   try {
