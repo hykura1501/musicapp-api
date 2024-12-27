@@ -68,6 +68,14 @@ export const loginGoogle = async (req, res, next) => {
     const { email, name, picture } = payload;
     const existedUser = await User.findOne({ email });
 
+
+    console.log("existedUser:", existedUser);
+
+    console.log("payload:", payload);
+
+    console.log("name:", name);
+    
+
     let token
 
     if (!existedUser) { 
