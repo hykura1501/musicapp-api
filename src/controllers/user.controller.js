@@ -1,6 +1,10 @@
 import User from "@/models/user.model";
 import Song from "@/models/song.model";
 import Artist from "@/models/artist.model";
+import sendMail from "@/helpers/sendMail";
+import ForgotPassword from "@/models/forgot-pass.model";
+import { v4 as uuidv4 } from "uuid";
+import { hash } from "bcrypt";
 // [GET] /user/me
 export const getMe = async (req, res) => {
   try {
@@ -57,20 +61,92 @@ export const updateMe = async (req, res) => {
   try {
     const body = req.body;
     const userId = req.user.id;
-    if (body.email) {
+
+    if (body.email && body.email !== req.user.email) {
       const emailExist = await User.findOne({ email: body.email });
       if (emailExist) {
         return res.status(400).json({ message: "Email already exists" });
       }
     }
+
+    if (body.password) {
+      delete body.password; // Prevent user from updating password
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userId }, body, {
       new: true,
-    });
+    }).select("-password");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     return res.status(200).json({ code: 200, data: user });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// [POST] /user/password/forgot
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const forgotPass = new ForgotPassword({ email, otp });
+    await forgotPass.save();
+    const subject = "OTP Code for Password Recovery";
+    const html = `Your OTP code to recover your password is: <b>${otp}</b>. Please do not share it with anyone. Note that this code is valid for only 5 minutes.`;
+    sendMail(email, subject, html);
+    return res.status(200).json({ code: 200, message: "Email sent" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// [POST] /user/password/otp
+export const otp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const forgotPass = await ForgotPassword.findOne({ email, otp });
+    if (!forgotPass) {
+      return res.status(400).json({ message: "OTP is incorrect" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const resetToken = uuidv4();
+    forgotPass.resetToken = resetToken;
+    await forgotPass.save();
+    return res.status(200).json({ code: 200, resetToken });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// [POST] /user/password/reset
+export const resetPassword = async (req, res) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+    const forgotPass = await ForgotPassword.findOne({ resetToken });
+    if (!forgotPass) {
+      return res.status(400).json({ message: "Invalid reset token" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const hashedPassword = await hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    return res
+      .status(200)
+      .json({ code: 200, message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 };
