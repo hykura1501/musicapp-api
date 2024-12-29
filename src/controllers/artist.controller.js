@@ -1,6 +1,6 @@
 import Artist from "@/models/artist.model";
 import User from "@/models/user.model";
-
+import Song from "@/models/song.model";
 // [POST] /artists/follow/:artistId
 export const followArtist = async (req, res) => {
   try {
@@ -83,6 +83,34 @@ export const unFollowArtist = async (req, res) => {
       code: 200,
       message: "Un-followed artist successfully",
       data: newUser.favoriteArtists,
+    });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: error.message });
+  }
+};
+
+// [GET] /artists/detail/:artistId
+export const getArtistDetail = async (req, res) => {
+  try {
+    const artistId = req.params.artistId;
+    if (!artistId) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Missing required fields" });
+    }
+    const artist = await Artist.findOne({
+      artistId,
+    })
+    if (!artist) {
+      return res.status(404).json({ code: 404, message: "Artist not found" });
+    }
+    const songs = await Song.find({ artistId }).select("-userId");;
+    return res.status(200).json({
+      code: 200,
+      data: {
+        artist,
+        songs,
+      },
     });
   } catch (error) {
     return res.status(500).json({ code: 500, message: error.message });

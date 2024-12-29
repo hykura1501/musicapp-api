@@ -17,6 +17,10 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+app.get("/test", (req, res) => {
+  res.send("Test router");
+});
+
 const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
