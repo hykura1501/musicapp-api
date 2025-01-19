@@ -4,7 +4,7 @@ import Artist from "@/models/artist.model";
 import sendMail from "@/helpers/sendMail";
 import ForgotPassword from "@/models/forgot-pass.model";
 import { v4 as uuidv4 } from "uuid";
-import { hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
 // [GET] /user/me
 export const getMe = async (req, res) => {
   try {
@@ -99,12 +99,16 @@ export const forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    const expiresAt = new Date(Date.now() + 1 * 60 * 1000);
+
     const otp = Math.floor(100000 + Math.random() * 900000);
-    const forgotPass = new ForgotPassword({ email, otp });
+    const forgotPass = new ForgotPassword({ email, otp, expiresAt });
     await forgotPass.save();
     const subject = "OTP Code for Password Recovery";
     const html = `Your OTP code to recover your password is: <b>${otp}</b>. Please do not share it with anyone. Note that this code is valid for only 5 minutes.`;
     sendMail(email, subject, html);
+    console.log(otp);
     return res.status(200).json({ code: 200, message: "Email sent" });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
@@ -115,8 +119,12 @@ export const forgotPassword = async (req, res) => {
 export const otp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-    const forgotPass = await ForgotPassword.findOne({ email, otp });
+    const forgotPass = await ForgotPassword.findOne({
+      email,
+      otp
+    });
     if (!forgotPass) {
+      console.log("OTP is incorrect");
       return res.status(400).json({ message: "OTP is incorrect" });
     }
 
@@ -124,6 +132,7 @@ export const otp = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     const resetToken = uuidv4();
     forgotPass.resetToken = resetToken;
     await forgotPass.save();
@@ -137,17 +146,20 @@ export const otp = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
+
+    
     const forgotPass = await ForgotPassword.findOne({ resetToken });
     if (!forgotPass) {
       return res.status(400).json({ message: "Invalid reset token" });
     }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+
     const hashedPassword = await hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
+
+    const user = await User.findOneAndUpdate(
+      { email: forgotPass.email },
+      { password: hashedPassword }
+    );
+
     return res
       .status(200)
       .json({ code: 200, message: "Password reset successfully" });
@@ -167,10 +179,37 @@ export const getPremium = async (req, res) => {
         premiumExpireAt: new Date(Date.now() + day * 24 * 60 * 60 * 1000),
       }
     ).select("-password");
-    return res
-      .status(200)
-      .json({ code: 200, message: "Upgrade successfully" });
+    return res.status(200).json({ code: 200, message: "Upgrade successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword, confirmNewPassword } = req.body;
+    if (newPassword !== confirmNewPassword) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Passwords do not match" });
+    }
+    const userId = req.user.id;
+    const user = await User.findById(userId);
+    const isMatch = await compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Old password is incorrect" });
+    }
+    const hashedPassword = await hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    return res
+      .status(200)
+      .json({ code: 200, message: "Password changed successfully" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ code: 500, message: "Internal server error" });
   }
 };
