@@ -102,3 +102,18 @@ export const getDownloadedSongs = async (req, res) => {
     return res.status(500).json({ code: 500, error: error.message });
   }
 };
+
+// [POST] /other/uploaded-songs
+
+export const getUploadedSongs = async (req, res) => { 
+  try {
+    const user = req.user;
+    const uploadedSongs = user.uploadedSongs;
+    if (!uploadedSongs) {
+      return res.status(404).json({ code: 404, message: "No uploaded songs found" });
+    }
+    return res.status(200).json({ code: 200, data: uploadedSongs });
+  } catch (error) {
+    return res.status(500).json({ code: 500, error: error.message });
+  }
+}
