@@ -21,19 +21,18 @@ export const followArtist = async (req, res) => {
     if (existed) {
       return res.status(400).json({ code: 400, message: "Already followed" });
     }
-    const newUser = await User.findByIdAndUpdate(
+    
+    const newUser = await User.findOneAndUpdate(
+      { _id: user._id },
       {
-        _id: user._id,
         $push: {
           favoriteArtists: {
             artistId,
           },
         },
       },
-      {
-        new: true,
-      }
-    );
+      { new: true }
+    )
     await Artist.updateOne({ _id: artistId }, { $inc: { follower: 1 } });
     return res.status(200).json({
       code: 200,
@@ -41,6 +40,7 @@ export const followArtist = async (req, res) => {
       data: newUser.favoriteArtists,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ code: 500, message: error.message });
   }
 };
@@ -65,18 +65,16 @@ export const unFollowArtist = async (req, res) => {
     if (!existed) {
       return res.status(400).json({ code: 400, message: "Not followed yet" });
     }
-    const newUser = await User.findByIdAndUpdate(
+    const newUser = await User.findOneAndUpdate(
+      { _id: user._id },
       {
-        _id: user._id,
         $pull: {
           favoriteArtists: {
             artistId,
           },
         },
       },
-      {
-        new: true,
-      }
+      { new: true }
     );
     await Artist.updateOne({ _id: artistId }, { $inc: { follower: -1 } });
     return res.status(200).json({
@@ -116,3 +114,17 @@ export const getArtistDetail = async (req, res) => {
     return res.status(500).json({ code: 500, message: error.message });
   }
 };
+
+export const getFollowingArtists = async (req, res) => { 
+  try {
+    const user = req.user;
+    const artistIds = user.favoriteArtists.map((item) => item.artistId);
+    const artists = await Artist.find({ _id: { $in: artistIds } });
+    return res.status(200).json({
+      code: 200,
+      data: artists,
+    });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: error.message }); 
+  }
+}
