@@ -1,5 +1,54 @@
 import Song from "@/models/song.model";
 import User from "@/models/user.model";
+const { ytmp3 } = require("@vreden/youtube_scraper");
+const cloudinary = require("cloudinary").v2;
+require("dotenv").config();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_SECRET_KEY,
+});
+// [POST] /song/youtube
+export const importSongFromYoutube = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { url } = req.body;
+
+    const result = await ytmp3(url, 128);
+    if (!result.status) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "Failed to process YouTube URL." });
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(
+      result.download.url,
+      {
+        resource_type: "video",
+      }
+    );
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          uploadedSongs: {
+            path: uploadResponse.url,
+            title: result.metadata.title,
+            duration: result.metadata.seconds,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    return res.status(201).json({ code: 201, data: user.uploadedSongs });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: error.message });
+  }
+};
 
 // [POST] /song
 export const createSong = async (req, res) => {

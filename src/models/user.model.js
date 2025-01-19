@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema(
     password: String,
     avatar: String,
     phone: String,
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    premiumExpireAt: Date,
     uploadedSongs: [
       {
         title: String,

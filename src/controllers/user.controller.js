@@ -63,9 +63,8 @@ export const updateMe = async (req, res) => {
     const userId = req.user.id;
 
     console.log("body:::::::", body);
-    
+
     console.log("req.user:::::::", req.user);
-    
 
     if (body.email && body.email !== req.user.email) {
       const emailExist = await User.findOne({ email: body.email });
@@ -73,7 +72,7 @@ export const updateMe = async (req, res) => {
         return res.status(400).json({ message: "Email already exists" });
       }
     }
-    
+
     if (body.password) {
       delete body.password; // Prevent user from updating password
     }
@@ -154,5 +153,24 @@ export const resetPassword = async (req, res) => {
       .json({ code: 200, message: "Password reset successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPremium = async (req, res) => {
+  try {
+    const { day } = req.body;
+    const userId = req.user.id;
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        isPremium: true,
+        premiumExpireAt: new Date(Date.now() + day * 24 * 60 * 60 * 1000),
+      }
+    ).select("-password");
+    return res
+      .status(200)
+      .json({ code: 200, message: "Upgrade successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

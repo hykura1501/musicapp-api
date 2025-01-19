@@ -10,7 +10,8 @@ import {
   addFavoriteSong,
   removeFavoriteSong,
   getNewReleaseSongs,
-  getSongDetail
+  getSongDetail,
+  importSongFromYoutube
 } from "@/controllers/song.controller";
 import authenticate from "@/middlewares/authenticate";
 import multer from "multer";
@@ -29,6 +30,8 @@ router.post(
   validate(createSongRules),
   createSong
 );
+
+router.post("/youtube", authenticate, importSongFromYoutube);
 
 router.get("/", getAllSongs);
 router.get("/detail/:songId", getSongDetail);
