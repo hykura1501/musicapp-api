@@ -100,7 +100,7 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const expiresAt = new Date(Date.now() + 1 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     const otp = Math.floor(100000 + Math.random() * 900000);
     const forgotPass = new ForgotPassword({ email, otp, expiresAt });
